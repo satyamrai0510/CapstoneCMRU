@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<QCARInfo>
+    <TargetSet version="3.4">
+        <AreaTarget version="5.2" bbox="-12.4279 -4.9955 -14.5767 14.4206 5.1933 29.8163" area="108" targetId="0b8df63f7ac449b4b598f5b65759f5db" name="hallway5th2" pathAuthoring="0b8df63f7ac449b4b598f5b65759f5db_authoring.glb" pathOcclusion="0b8df63f7ac449b4b598f5b65759f5db_occlusion.3dt" pathNavMesh="0b8df63f7ac449b4b598f5b65759f5db_navmesh.glb" cloudTarget="false" />
+    </TargetSet>
+</QCARInfo>
