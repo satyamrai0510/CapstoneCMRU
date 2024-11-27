@@ -102,35 +102,45 @@ public class PathEstimationUtils : MonoBehaviour
 
     public float EstimateDistanceToPosition(POI destination)
     {
-        agent.isStopped = true;
-        NavMeshPath path = new NavMeshPath();
-
-        if (!agent.isOnNavMesh)
+        if (destination == null || destination.poiCollider == null)
         {
+            Debug.LogError("Destination or its collider is null!");
             return -1;
         }
 
-        NavMesh.CalculatePath(agent.gameObject.transform.position, destination.poiCollider.transform.position, NavMesh.AllAreas, path);
-
-        if (path.status == NavMeshPathStatus.PathPartial)
+        if (!agent.isOnNavMesh)
         {
-            // handle unreachable route
-            NotificationController.instance.ShowNewNotification("Problem calculating route. Please contact the publisher (see imprint).");
-            ARNavController.instance.StopNavigation();
+            Debug.LogWarning("Agent is not on a valid NavMesh!");
+            return -1;
+        }
+
+        NavMeshPath navMeshPath = new NavMeshPath();
+        agent.isStopped = true;
+
+        bool pathFound = NavMesh.CalculatePath(agent.transform.position, destination.poiCollider.transform.position, NavMesh.AllAreas, navMeshPath);
+
+        if (!pathFound || navMeshPath.status == NavMeshPathStatus.PathInvalid)
+        {
+            Debug.LogWarning("Path to destination is invalid!");
+            return -1;
+        }
+
+        if (navMeshPath.status == NavMeshPathStatus.PathPartial)
+        {
+            Debug.LogWarning("Partial path detected: Destination may be unreachable.");
             return -2;
         }
 
-        if (path.corners.Length > 1)
+        if (navMeshPath.corners.Length > 1)
         {
-            float distance = 0;
-            for (int i = 0; i < path.corners.Length; i++)
+            float totalDistance = 0f;
+            for (int i = 0; i < navMeshPath.corners.Length - 1; i++)
             {
-                if (i < path.corners.Length - 1) // we always comparing with next one
-                {
-                    distance += Vector3.Distance(path.corners[i], path.corners[i + 1]);
-                }
+                totalDistance += Vector3.Distance(navMeshPath.corners[i], navMeshPath.corners[i + 1]);
             }
-            return distance;
+
+            Debug.Log($"Calculated distance to {destination.poiName}: {totalDistance} meters");
+            return totalDistance;
         }
 
         return -1;

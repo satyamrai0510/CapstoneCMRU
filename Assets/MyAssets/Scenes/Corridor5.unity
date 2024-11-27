@@ -299,6 +299,8 @@ MonoBehaviour:
   agent: {fileID: 878784609}
   currentDestination: {fileID: 0}
   agumentedSpace: {fileID: 1008352354}
+  isEmergencyMode: 0
+  selectList: {fileID: 0}
 --- !u!1001 &112041619
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -790,7 +792,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &532421146
 RectTransform:
   m_ObjectHideFlags: 0
@@ -798,7 +800,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 532421145}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1247,7 +1249,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 715276349}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &715276349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1348,15 +1362,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8098377307223922035, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.6887559
+      value: -2.652
       objectReference: {fileID: 0}
     - target: {fileID: 8098377307223922035, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.047999978
+      value: -0.055
       objectReference: {fileID: 0}
     - target: {fileID: 8098377307223922035, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.73420554
+      value: -0.473
       objectReference: {fileID: 0}
     - target: {fileID: 8098377307223922035, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1405,6 +1419,10 @@ PrefabInstance:
     - target: {fileID: 8098377307223922036, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
       propertyPath: identification
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8098377307223922036, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
+      propertyPath: isEmergencyExit
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2309,6 +2327,7 @@ MonoBehaviour:
   backgroundNoProgress: {fileID: 9069698843619513484}
   settingsUI: {fileID: 2616467651472866037}
   settingsButton: {fileID: 79216181490833952}
+  emergencyModeIndicator: {fileID: 532421145}
 --- !u!1 &1386946066
 GameObject:
   m_ObjectHideFlags: 0
@@ -2605,6 +2624,10 @@ PrefabInstance:
       propertyPath: identification
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 8098377307223922036, guid: 96d53201a096c3a46b630f34fa328b10, type: 3}
+      propertyPath: isEmergencyExit
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2664,6 +2687,7 @@ MonoBehaviour:
   offscreenTarget: {fileID: 0}
   cornerVisualizationPrefab: {fileID: 4213530842201404898, guid: 9cee8f88718ede24692b7dcc9ed8b3b5, type: 3}
   showCornersToggle: 0
+  emergencyPathColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!120 &1851690540
 LineRenderer:
   serializedVersion: 2
@@ -6612,6 +6636,7 @@ MonoBehaviour:
   titleNoBackButton: {fileID: 3018399122981157711}
   titleWithBackButton: {fileID: 8329847121432068645}
   pois: []
+  emergencyExits: []
 --- !u!114 &1968381838538082919
 MonoBehaviour:
   m_ObjectHideFlags: 0

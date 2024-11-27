@@ -12,6 +12,7 @@ public class POI : ListItemData
     public POICollider poiCollider;             // object for nav mesh agent calculation and detect user arrival
     public POISign sign;                        // sign of POI
     AugmentedSpace space;                       // space in which POI is located
+    public bool isEmergencyExit = false;
 
     private void Awake()
     {
@@ -42,4 +43,4 @@ public class POI : ListItemData
 }
 
 
-public enum POIType { TutorialRoom, LectureHall, Staircase, Elevator }
+public enum POIType { TutorialRoom, LectureHall, Staircase, Elevator, EmergencyExit }

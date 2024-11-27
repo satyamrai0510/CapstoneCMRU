@@ -28,6 +28,7 @@ public class SelectList : MonoBehaviour
     public List<ListItemData> pois; // all items available for list
 
     List<ListItemData> currentItemsTotal;
+    public List<POI> emergencyExits;
 
     public void Awake()
     {
@@ -37,10 +38,21 @@ public class SelectList : MonoBehaviour
     private void PrepareAllData()
     {
         pois = new List<ListItemData>();
+        emergencyExits = new List<POI>();
 
         foreach (var poi in ARNavController.instance.agumentedSpace.GetPOIs())
         {
             pois.Add(poi);
+            if (poi.isEmergencyExit)
+            {
+                emergencyExits.Add(poi);
+                Debug.Log($"Added Emergency Exit: {poi.poiName}");
+            }
+        }
+
+        if (emergencyExits.Count == 0)
+        {
+            Debug.LogWarning("No emergency exits found in the current space!");
         }
     }
 
@@ -184,4 +196,49 @@ public class SelectList : MonoBehaviour
         // Return the result of the first CompareTo.
         return compareResult;
     }
+    
+    public void AddEmergencyExit(POI exit)
+    {
+        if (!emergencyExits.Contains(exit))
+        {
+            emergencyExits.Add(exit);
+        }
+    }
+    
+    public POI GetNearestEmergencyExit(Vector3 currentPosition)
+    {
+        if (emergencyExits == null || emergencyExits.Count == 0)
+        {
+            Debug.LogWarning("No emergency exits available!");
+            return null;
+        }
+
+        POI nearestExit = null;
+        float minDistance = Mathf.Infinity;
+
+        foreach (var exit in emergencyExits)
+        {
+            if (exit == null) continue;
+
+            float distance = PathEstimationUtils.instance.EstimateDistanceToPosition(exit);
+
+            if (distance >= 0 && distance < minDistance)
+            {
+                minDistance = distance;
+                nearestExit = exit;
+            }
+        }
+
+        if (nearestExit == null)
+        {
+            Debug.LogWarning("No reachable emergency exits found!");
+        }
+        else
+        {
+            Debug.Log($"Nearest emergency exit: {nearestExit.name}, Distance: {minDistance}");
+        }
+
+        return nearestExit;
+    }
+
 }

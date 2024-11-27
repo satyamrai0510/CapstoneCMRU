@@ -28,6 +28,9 @@ public class ARNavController : MonoBehaviour
      */
     public AugmentedSpace agumentedSpace;
 
+    public bool isEmergencyMode = false;
+    public SelectList selectList;
+
     private void Awake()
     {
         instance = this;
@@ -96,6 +99,38 @@ public class ARNavController : MonoBehaviour
             // not localized, not navigating
             ARCameraCollider.enabled = false;
         }
+    }
+
+    public void ActivateEmergencyMode()
+    {
+        if (selectList == null)
+        {
+            Debug.LogError("SelectList is not assigned!");
+            return;
+        }
+
+        Debug.Log("Activating Emergency Mode...");
+        POI nearestExit = selectList.GetNearestEmergencyExit(transform.position);
+
+        if (nearestExit == null)
+        {
+            Debug.LogWarning("No emergency exits found!");
+            NotificationController.instance.ShowNewNotification("No Emergency Exit Found!");
+            return;
+        }
+
+        Debug.Log($"Navigating to emergency exit: {nearestExit.poiName}");
+        SetPOIForNavigation(nearestExit);
+        isEmergencyMode = true;
+
+        // Notify NavUIController for updates
+        NavUIController.instance.ShowEmergencyModeUI(true);
+    }
+
+    public void DeactivateEmergencyMode()
+    {
+        isEmergencyMode = false;
+        StopNavigation();
     }
 
     /**

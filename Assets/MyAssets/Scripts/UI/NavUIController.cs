@@ -38,6 +38,7 @@ public class NavUIController : MonoBehaviour
     // settings
     public GameObject settingsUI;
     public GameObject settingsButton;
+    public GameObject emergencyModeIndicator;
 
     private void Awake()
     {
@@ -220,4 +221,39 @@ public class NavUIController : MonoBehaviour
     {
         ShowNavMesh.instance.ToggleVisibility();
     }
+
+    public void OnEmergencyButtonPressed()
+    {
+        Debug.Log("Emergency Button Pressed");
+        if (ARNavController.instance != null)
+        {
+            ARNavController.instance.ActivateEmergencyMode();
+        }
+        else
+        {
+            Debug.LogError("ARNavController instance is null!");
+        }
+    }
+
+    public void ShowEmergencyModeUI(bool isActive)
+    {
+        if (emergencyModeIndicator != null)
+        {
+            emergencyModeIndicator.GetComponent<TextMeshProUGUI>().text = isActive ? "Emergency Mode Active" : "";
+            emergencyModeIndicator.SetActive(isActive);
+        }
+    }
+
+    public void OnExitEmergencyMode()
+    {
+        if (ARNavController.instance != null)
+        {
+            ARNavController.instance.DeactivateEmergencyMode();
+            if (emergencyModeIndicator != null)
+            {
+                emergencyModeIndicator.SetActive(false);
+            }
+        }
+    }
+
 }
