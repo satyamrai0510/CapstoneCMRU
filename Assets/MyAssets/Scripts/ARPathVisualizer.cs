@@ -54,6 +54,15 @@ public class ARPathVisualizer : MonoBehaviour
 
     // true when showCornersToggle was used, needed to track change so we don't loop all the time 
     bool cornerVisibilityHasChanged = false;
+    public Color emergencyPathColor = Color.red;
+
+    public void DisplayEmergencyPath(List<Vector3> pathPoints)
+    {
+        for (int i = 0; i < pathPoints.Count - 1; i++)
+        {
+            Debug.DrawLine(pathPoints[i], pathPoints[i + 1], emergencyPathColor, 1f);
+        }
+    }
 
     void Awake()
     {

@@ -11,6 +11,8 @@ enum NavigationState
 
 public class NavUIController : MonoBehaviour
 {
+    public GameObject emergencyModeIndicator;
+    public GameObject stopEmergencybutton;
     // localization
     public GameObject pleaseScanOverlay;                // scanning environment overlay to inform user about idealy pointing device camera on environment
     public TextMeshProUGUI localizationStatus;          // status information about localization
@@ -50,6 +52,8 @@ public class NavUIController : MonoBehaviour
         settingsUI.SetActive(false);
         ShowNavigationUIElements(false);
         DestinationSelectUI.SetActive(false);
+        emergencyModeIndicator.SetActive(false);
+        stopEmergencybutton.SetActive(false);
 
         destinationName.text = "";
     }
@@ -219,5 +223,18 @@ public class NavUIController : MonoBehaviour
     public void ToggleNavMeshVisibility()
     {
         ShowNavMesh.instance.ToggleVisibility();
+    }
+     public void OnEmergencyButtonPressed()
+    {
+        ARNavController.instance.ActivateEmergencyMode();
+        emergencyModeIndicator.SetActive(true);
+        stopEmergencybutton.SetActive(true);
+    }
+
+    public void OnExitEmergencyMode()
+    {
+        ARNavController.instance.DeactivateEmergencyMode();
+        emergencyModeIndicator.SetActive(false);
+        stopEmergencybutton.SetActive(false);
     }
 }

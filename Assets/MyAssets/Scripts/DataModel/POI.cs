@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class POI : ListItemData
 {
+    public bool isEmergencyExit = false;
     int id;
     public int identification;                  // a unique identification for this point, e.g. room number - INFO: currently ignored in code!
     public string poiName;                      // title of Point of interest (POI)
@@ -38,8 +39,13 @@ public class POI : ListItemData
             ARNavController.instance.ArrivedAtDestination();
         }
     }
+    public void SetVisibility(bool isVisible)
+    {
+        gameObject.SetActive(isVisible); // Control the GameObject's visibility
+    }
 
 }
+
 
 
 public enum POIType { TutorialRoom, LectureHall, Staircase, Elevator }

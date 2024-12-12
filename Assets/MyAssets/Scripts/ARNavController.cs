@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using TMPro;
+using System.Linq;
+
 
 /**
  * Handles the agent and other controllers to navigate a user in AR to a selected destination.
  */
 public class ARNavController : MonoBehaviour
 {
+    private Coroutine emergencyTrackingCoroutine;
+    private Vector3 previousPosition;
+    public bool isEmergencyMode = false;
+    public SelectList selectList;
     public static ARNavController instance;
 
     /** AR camera of scene **/
@@ -32,6 +38,9 @@ public class ARNavController : MonoBehaviour
     {
         instance = this;
         ARCamera = Camera.main;
+
+        // Initialize previous position
+        previousPosition = agent.transform.position;
     }
 
     // Start is called before the first frame update
@@ -52,6 +61,13 @@ public class ARNavController : MonoBehaviour
 
         // invoke to get started
         ARStateController.instance.PositionLostEvent.Invoke();
+        foreach (POI exit in selectList.emergencyExits)
+        {
+            if (exit != null)
+            {
+                exit.SetVisibility(false);
+            }
+        }
     }
 
     // Update is called once per frame
@@ -106,7 +122,16 @@ public class ARNavController : MonoBehaviour
         currentDestination = aPOI;
         if (ARStateController.instance.IsLocalized())
         {
+            if (isEmergencyMode)
+        {
+            // For Emergency Mode, update navigation dynamically
+            UpdateNavigationPath(aPOI);
+        }
+        else
+        {
+            // Normal navigation setup
             StartNavigation();
+        }
         }
         else
         {
@@ -127,12 +152,29 @@ public class ARNavController : MonoBehaviour
      */
     public void StopNavigation()
     {
+        if (isEmergencyMode)
+    {
+        isEmergencyMode = false;
+        if (emergencyTrackingCoroutine != null)
+        {
+            StopCoroutine(emergencyTrackingCoroutine);
+            emergencyTrackingCoroutine = null;
+        }
+    }
         if (currentDestination != null)
         {
             currentDestination = null;
             ARPathVisualizer.instance.ResetPath();
-            //PathEstimationUtils.instance.ResetEstimation();
+            PathEstimationUtils.instance.ResetEstimation();
         }
+        foreach (POI poi in selectList.pois)
+    {
+        if (poi != null)
+        {
+            poi.SetVisibility(!poi.isEmergencyExit); // Show non-emergency POIs, hide emergency exits
+        }
+    }
+        
     }
 
     /**
@@ -142,6 +184,10 @@ public class ARNavController : MonoBehaviour
     {
         StopNavigation();
         NavUIController.instance.ShowArrivedState();
+        NavUIController.instance.stopEmergencybutton.SetActive(false);
+        NavUIController.instance.emergencyModeIndicator.SetActive(false);
+        NavUIController.instance.ClickedStopButton();
+
     }
 
     /**
@@ -150,5 +196,188 @@ public class ARNavController : MonoBehaviour
     public bool IsCurrentlyNavigating()
     {
         return currentDestination != null;
+    }
+
+
+    public void ActivateEmergencyMode()
+    {
+        isEmergencyMode = true;
+        foreach (POI poi in selectList.pois)
+    {
+        if (poi != null)
+        {
+            if (poi.isEmergencyExit)
+            {
+                poi.SetVisibility(false); // Initially hide all emergency exits
+            }
+            else
+            {
+                poi.SetVisibility(false); // Hide all other POIs
+            }
+        }
+    }
+        // POI nearestExit = selectList.GetNearestEmergencyExit(transform.position);
+        // if (nearestExit != null)
+        // {
+        //     nearestExit.SetVisibility(true); // Show only the nearest exit
+        //     SetPOIForNavigation(nearestExit);
+        // }
+        // else
+        // {
+        //     Debug.LogWarning("No emergency exits found!");
+        // }
+        if (emergencyTrackingCoroutine == null)
+    {
+        emergencyTrackingCoroutine = StartCoroutine(TrackNearestExit());
+    }
+    }
+
+    public void DeactivateEmergencyMode()
+    {
+        isEmergencyMode = false;
+        StopNavigation();
+
+        if (emergencyTrackingCoroutine != null)
+        {
+        StopCoroutine(emergencyTrackingCoroutine);
+        emergencyTrackingCoroutine = null;
+        NavUIController.instance.ClickedStopButton();
+        }
+
+        // Hide all emergency exits
+        foreach (POI poi in selectList.pois)
+        {
+        if (poi != null)
+        {
+            poi.SetVisibility(!poi.isEmergencyExit); // Show non-emergency POIs, hide emergency exits
+        }
+        }
+        foreach (POI exit in selectList.emergencyExits)
+        {
+        if (exit != null)
+            {
+            exit.SetVisibility(false);
+            }
+        }
+    }
+
+
+
+
+
+    private IEnumerator TrackNearestExit()
+{
+    POI currentNearestExit = null;
+
+    while (isEmergencyMode)
+    {
+        // Get the user's current speed
+        float userSpeed = instance.CalculateSpeed();
+
+        // Adjust the wait time based on the user's speed
+        float adjustedWaitTime = Mathf.Lerp(3f, 0.5f, Mathf.Clamp(userSpeed / 5f, 0f, 1f));
+
+        // Find the nearest emergency exit
+        POI nearestExit = selectList.GetNearestEmergencyExit(transform.position);
+
+        if (nearestExit != null && nearestExit != currentNearestExit)
+        {
+            currentNearestExit = nearestExit;
+
+            // Update POI visibility: hide all, show only the nearest exit
+            foreach (POI poi in selectList.pois)
+            {
+                if (poi != null)
+                {
+                    poi.SetVisibility(poi == currentNearestExit); // Show only the nearest POI
+                }
+            }
+
+            // Dynamically update the path to the nearest exit
+            SetPOIForNavigation(currentNearestExit);
+            Debug.Log($"Updated path to new nearest exit: {currentNearestExit.name}");
+        }
+
+        // Check if the user has arrived at the destination
+        if (currentNearestExit != null && HasArrivedAtDestination(currentNearestExit))
+        {
+            Debug.Log($"Arrived at destination: {currentNearestExit.name}");
+            StopNavigation();
+            yield break; // Exit the coroutine
+        }
+
+        // Adjust frequency as needed
+        // yield return new WaitForSeconds(1);
+
+        // Wait based on the user's speed (adaptive frequency)
+        yield return new WaitForSeconds(adjustedWaitTime);
+    }
+
+    emergencyTrackingCoroutine = null;
+}
+
+
+
+
+
+
+private void UpdateNavigationPath(POI destination)
+{
+    if (!isEmergencyMode) return; // Only update dynamically in Emergency Mode
+
+    if (destination == null)
+    {
+        Debug.LogError("Destination is null! Cannot update path.");
+        return;
+    }
+
+    // Recalculate the path for the updated destination
+    Vector3[] pathPoints = CalculatePathPoints(destination);
+    if (pathPoints != null)
+    {
+        ARPathVisualizer.instance.DisplayEmergencyPath(pathPoints.ToList()); // Update path visuals
+        Debug.Log($"Path updated dynamically for {destination.poiName}");
+    }
+    else
+    {
+        Debug.LogWarning("Failed to update path for the new destination.");
+    }
+}
+
+
+
+
+private Vector3[] CalculatePathPoints(POI destination)
+{
+    NavMeshPath path = new NavMeshPath();
+    if (NavMesh.CalculatePath(agent.transform.position, destination.poiCollider.transform.position, NavMesh.AllAreas, path))
+    {
+        return path.corners; // Return calculated path points
+    }
+    return null; // Path could not be calculated
+}
+
+
+
+
+private bool HasArrivedAtDestination(POI destination)
+{
+    if (destination == null) return false;
+
+    float distanceToDestination = Vector3.Distance(transform.position, destination.transform.position);
+    return distanceToDestination <= 1f; // Adjust threshold as needed (e.g., 1.5 meters)
+}
+
+
+
+
+public float CalculateSpeed()
+    {
+        float distanceMoved = Vector3.Distance(agent.transform.position, previousPosition);
+        float speed = distanceMoved / Time.deltaTime;  // speed = distance / time (per frame)
+
+        previousPosition = agent.transform.position;  // Update previous position
+        Debug.Log($"speed of agent {speed}");
+        return speed;
     }
 }

@@ -9,11 +9,16 @@ public class NavMeshAgentHelper : MonoBehaviour
     /** ARCamera GameObject **/
     GameObject ARcamera;
 
+    public static NavMeshAgentHelper instance;
+
     /** NavMeshAgent component on same GameObject **/
     NavMeshAgent agent;
 
     /** mesh of agent **/
     MeshRenderer mesh;
+
+    /** Previous position of the agent **/
+    private Vector3 previousPosition;
 
     void Awake()
     {
@@ -21,12 +26,16 @@ public class NavMeshAgentHelper : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         // TODO: mesh = GetComponent<MeshRenderer>();
         // TODO: mesh.enabled = false;
+
+        // Initialize previous position
+        previousPosition = agent.transform.position; 
     }
+
 
     void Update()
     {
-        //if (ARStateController.instance.IsLocalized())
-        //{
+        if (ARStateController.instance.IsLocalized())
+        {
         // teleport agent to camera x & z, but take y from agent object
         agent.Warp(new Vector3(ARcamera.transform.position.x, agent.gameObject.transform.position.y, ARcamera.transform.position.z));
 
@@ -41,7 +50,10 @@ public class NavMeshAgentHelper : MonoBehaviour
             // -3.5 is when camera is up, but agent is on floor below
             agent.Warp(new Vector3(ARcamera.transform.position.x, ARcamera.transform.position.y + 3.5f, ARcamera.transform.position.z));
         }
+        }
     }
+
+
 
     /**
      * Toggles visibility of nav mesh agent
@@ -50,4 +62,17 @@ public class NavMeshAgentHelper : MonoBehaviour
     {
         mesh.enabled = !mesh.enabled;
     }
+
+
+
+    public float CalculateSpeed()
+    {
+        float distanceMoved = Vector3.Distance(agent.transform.position, previousPosition);
+        float speed = distanceMoved / Time.deltaTime;  // speed = distance / time (per frame)
+
+        previousPosition = agent.transform.position;  // Update previous position
+        Debug.Log($"speed of agent {speed}");
+        return speed;
+    }
+
 }
