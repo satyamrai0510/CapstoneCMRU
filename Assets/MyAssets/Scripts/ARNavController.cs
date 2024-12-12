@@ -186,4 +186,15 @@ public class ARNavController : MonoBehaviour
     {
         return currentDestination != null;
     }
+    public void OnDestinationReached()
+{
+    progressSlider.gameObject.SetActive(false);
+    stopButton.gameObject.SetActive(false);
+}
+
+
+
+
+
+
 }
