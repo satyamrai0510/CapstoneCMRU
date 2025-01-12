@@ -129,6 +129,7 @@ public class ARStateController : MonoBehaviour
                 {
                     isLocalizationCountdownStarted = true;
                     StartCoroutine(LocalizationAttemptsCountdown());
+                    // StartCoroutine(LocalizationAttempt);
                 }
             }
             else if (statusInfo == StatusInfo.INITIALIZING)
