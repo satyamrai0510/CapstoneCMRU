@@ -1,4 +1,4 @@
-# Real-Time AR Navigation with Adaptive Zone Segmentation
+# Dynamic Emergency Navigation System for Indoor Evacuation
 
 Birth of this repo: 07.11.2024
 
@@ -18,5 +18,6 @@ Birth of this repo: 07.11.2024
 
 | Version | Date       | Changes       |
 | ------- | ---------- | ------------- |
-| 0.0.1   | 01.1.2024 | - basic setup |
+| 0.0.1   | 07.11.2024 | - basic setup |
+| 0.0.1   |            | - emergency exit |
 
